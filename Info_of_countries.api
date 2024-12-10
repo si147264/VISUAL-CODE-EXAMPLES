@@ -1,0 +1,15 @@
+import requests
+base_url="https://restcountries.com/v3.1/name/"
+country_name=input("please choose a country")
+response=requests.get(base_url+country_name)
+#Bu kısım, base_url ile kullanıcıdan alınan ülke adını birleştirir ve tam API URL'sini oluşturur.
+if response.status_code==200:
+    data=response.json()
+    print(f"countryname,{data[0]["name"]}")
+    print(f"capital,{data[0]["capital"]}")
+    print(f"region,{data[0]["region"]}")
+    print(f"Subregion,{data[0]["subregion"]}")
+    print(f"population,{data[0]["population"]}")
+else:
+    print(f"{country_name} is not found")
+
