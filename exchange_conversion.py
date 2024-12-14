@@ -1,5 +1,5 @@
 import requests
-api_key= "4rgCNqZClGoGyIQIx00qRu:0kEueqq722pKVLLK6dsOx2"
+api_key= "enter your api"
 base_url="https://api.collectapi.com/economy/exchange"
 
 base_currency=input("enter your currency unit which you want to exchange").upper()
