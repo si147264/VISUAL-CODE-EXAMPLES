@@ -1,6 +1,6 @@
 import requests
 
-api_key = "97b9d3a2"
+api_key = "enter you api"
 base_url = "https://www.omdbapi.com/"
 
 movie_name = input("Tell me the name of the movie you want to watch: ")
