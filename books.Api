@@ -1,0 +1,53 @@
+import pyodbc
+from flask import Flask, request, jsonify
+
+connection = pyodbc.connect(
+    "Driver={ODBC Driver 17 for SQL Server};"
+    "Server=VIVOBOOK\\SQLEXPRESS;"
+    "Database=LibraryDB;"
+    "Trusted_Connection=yes;"
+)
+cursor = connection.cursor()
+print("SQL is connected")  
+
+
+app = Flask(__name__)
+@app.route("/Books", methods=["GET"])
+def renting():
+  
+    cursor.execute("SELECT * FROM Books")
+    rows = cursor.fetchall()
+   
+    books = [{"id":row[0],"Title": row[1], "Author": row[2], "Price": row[3],"Stock":row[4],"Genre":row[5]} for row in rows]
+
+    return jsonify(books)
+# Flask uygulamasını başlat
+@app.route("/Books", methods=["POST"])
+def add_new_info():
+    data=request.get_json()
+    cursor.execute(
+    "INSERT INTO Books (Title, Author, Price, Stock, Genre) VALUES (?, ?, ?, ?, ?)",
+    (data["Title"], data["Author"], data["Price"], data["Stock"], data["Genre"])
+)
+    connection.commit()  
+    return jsonify({"message": "Book is added successfully!"}), 201
+@app.route("/Books/<int:ID>", methods=["PUT"])
+def update_books(ID):
+    data = request.get_json()
+    cursor.execute(
+        "UPDATE Books SET Title=?, Author=?, Price=?, Stock=? WHERE ID=?",
+        (data.get("Title"), data.get("Author"), data.get("Price"), data.get("Stock"), ID)
+    )
+    connection.commit()
+    return jsonify({"new info is updated"})
+
+@app.route("/Books/<int:ID>", methods=["DELETE"])
+def delete_book(ID):
+    cursor.execute("DELETE FROM Books WHERE ID=?", (ID,))
+    connection.commit()
+
+    return jsonify({"message": f"Book with ID {ID} has been deleted successfully!"}), 200
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
