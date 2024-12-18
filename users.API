@@ -1,0 +1,51 @@
+import pyodbc
+from flask import Flask, request, jsonify
+
+connection = pyodbc.connect(
+    "Driver={ODBC Driver 17 for SQL Server};"
+    "Server=VIVOBOOK\\SQLEXPRESS;"
+    "Database=Users;"
+    "Trusted_Connection=yes;"
+)
+
+cursor=connection.cursor()
+print("SQL is connected")
+
+app = Flask(__name__)
+
+@app.route('/users', methods=["GET"])
+def show():
+    cursor.execute("SELECT * FROM users")
+    rows = cursor.fetchall()
+    users = [{"ID": row[0], "username": row[1], "email":row[2],"password": row[3]} for row in rows]
+    
+    return jsonify(users)
+
+@app.route('/users', methods=["POST"])
+def add_new_userinfo():
+    data = request.get_json()  
+    cursor.execute(
+        "INSERT INTO users (username, email,password) VALUES (?,?, ?)",
+        (data["username"],data["email"], data["password"])
+    )
+    connection.commit() 
+    return jsonify({"message": "New user info is added into user list successfully!"}), 201
+@app.route('/users/<ID>', methods=["PUT"])
+def update_user_info(ID):
+    data = request.get_json()
+    cursor.execute(
+        "UPDATE users SET username=?, email=?, password=? WHERE ID=?",
+        (data.get("username"), data.get("email"), data.get("password"), ID)
+    )
+    connection.commit()
+    return jsonify({"message": "User in the user list is updated"}), 201
+@app.route("/users/<int:ID>", methods=["DELETE"])
+def delete_user(ID):
+    cursor.execute("DELETE FROM users WHERE ID=?", (ID,))
+    connection.commit()
+    
+    return jsonify({"message": f"User with ID {ID} has been deleted successfully!"}), 200
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
