@@ -1,0 +1,41 @@
+import pyodbc
+from flask import Flask, request, jsonify
+
+connection = pyodbc.connect(
+    "Driver={ODBC Driver 17 for SQL Server};"
+    "Server=VIVOBOOK\\SQLEXPRESS;"
+    "Database=USER;"
+    "Trusted_Connection=yes;"
+)
+cursor = connection.cursor()
+print("SQL is connected", cursor)
+app = Flask(__name__)
+
+
+
+@app.route('/user/<int:UserID>/deactivated',methods=["POST"])
+def deactivated(UserID):
+
+    if request.method=="POST":
+    
+        cursor.execute("UPDATE [user] SET Isactive = 0 WHERE  UserID=?",(UserID,))
+        connection.commit()
+        return jsonify({"message": "User deactivated successfully"}), 200
+    else:
+        return jsonify({"message": "Invalid request method"}), 405
+    
+
+@app.route('/user/<int:UserID>/activated',methods=["POST"])
+def activated(UserID):
+
+    if request.method=="POST":
+    
+        cursor.execute("UPDATE [user] SET Isactive = 1 WHERE  UserID=?",(UserID,))
+        connection.commit()
+        return jsonify({"message": "User activated successfully"}), 200
+    else:
+        return jsonify({"message": "Invalid request method"}), 405
+
+      
+if __name__ == '__main__':
+    app.run(debug=True)
